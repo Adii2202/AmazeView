@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Chatbot from "./pages/Chatbot";
 import Redirect from "./Redirect";
+import StaggeredDropDown from "./components/chatbot/StaggeredDropDown";
 import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -40,6 +41,11 @@ function App() {
           {token && (<NavBar />)}
           {!isNavBarOpen && (<>
             <Outlet />
+            {token && (
+              <div className="fixed bottom-12 right-36">
+                <StaggeredDropDown />
+              </div>
+            )}
             {token && (<Footer />)}
           </>)}
         </>
@@ -61,10 +67,10 @@ function App() {
           path: '/dashboard',
           element: <Dashboard />
         },
-        {
-          path: '/chatbot',
-          element: <Chatbot />
-        }
+        // {
+        //   path: '/chatbot',
+        //   element: <Chatbot />
+        // }
       ]
     }
   ]);

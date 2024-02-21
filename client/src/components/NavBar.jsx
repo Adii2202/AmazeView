@@ -7,7 +7,7 @@ import logo from '../assets/logo-hck.svg'
 const navigation = [
     { name: 'Home', href: '/home', current: false },
     { name: 'Dashboard', href: '/dashboard', current: false },
-    { name: 'ChatBot', href: '/chatbot', current: false },
+    // { name: 'ChatBot', href: '/chatbot', current: false },
 ]
 
 function classNames(...classes) {
@@ -47,8 +47,8 @@ function NavBar() {
                     // src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
                     alt="Your Company"
                   />
-                  <span className='font-bold text-white  tracking-wide ml-2 text-xl'>
-                    Crescendo
+                  <span className="font-bold text-white  tracking-wide ml-2 text-xl">
+                    AmazeView
                   </span>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
@@ -58,10 +58,12 @@ function NavBar() {
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.href === path ? 'underline font-bold' : 'hover:bg-slate-900 hover:underline',
-                          'rounded-md px-3 py-2 text-sm text-white'
+                          item.href === path
+                            ? "underline font-bold"
+                            : "hover:bg-slate-900 hover:underline",
+                          "rounded-md px-3 py-2 text-sm text-white"
                         )}
-                        aria-current={item.current ? 'page' : undefined}
+                        aria-current={item.current ? "page" : undefined}
                       >
                         {item.name}
                       </a>
@@ -87,7 +89,7 @@ function NavBar() {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full"
-                        src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+                        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                         // src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                         alt=""
                       />
@@ -116,11 +118,14 @@ function NavBar() {
                       <Menu.Item>
                         {({ active }) => (
                           <a
-                          onClick={() => {
-                            localStorage.clear()
-                            window.location.href = '/login'
-                          }}
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700 cursor-pointer')}
+                            onClick={() => {
+                              localStorage.clear();
+                              window.location.href = "/login";
+                            }}
+                            className={classNames(
+                              active ? "bg-gray-100" : "",
+                              "block px-4 py-2 text-sm text-gray-700 cursor-pointer"
+                            )}
                           >
                             Sign out
                           </a>
@@ -141,10 +146,12 @@ function NavBar() {
                   as="a"
                   href={item.href}
                   className={classNames(
-                    item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block rounded-md px-3 py-2 text-base font-medium'
+                    item.current
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                    "block rounded-md px-3 py-2 text-base font-medium"
                   )}
-                  aria-current={item.current ? 'page' : undefined}
+                  aria-current={item.current ? "page" : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>
@@ -154,7 +161,7 @@ function NavBar() {
         </>
       )}
     </Disclosure>
-  )
+  );
 }
 
 export default NavBar

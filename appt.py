@@ -1,7 +1,5 @@
-from flask import Flask, jsonify, request
-import pandas as pd
+from flask import Flask, jsonify
 from pytrends.request import TrendReq
-import statsmodels.api as sm
 
 app = Flask(__name__)
 
@@ -13,24 +11,36 @@ valid_timeframes = [
     "today 5-y"
 ]
 
-@app.route('/sva', methods=['GET'])
+
+@app.route('/sva', methods=["GET"])
 def interest_over_time():
-    pytrends = TrendReq(hl='en-US', tz=360)
-    product_name = "ColgATE"
-    kw_list = [product_name]
-    geo = "IN"
-    
-    sva_data = {}
+    try:
+        pytrends = TrendReq(hl='en-US', tz=360)
+        product_name = global_title
+        print(f"\nproduct name {product_name}\n")
+        kw_list = [product_name]
+        geo_global = "IN"
+        # geo_regional = "IN-IN"  # Regional level for India
+        
+        sva_data = {}
+        regional_data = {}
 
-    for timeframe in valid_timeframes:
-        pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo=geo)
-        interest_over_time_df = pytrends.interest_over_time().reset_index()
-        interest_over_time_df['date'] = interest_over_time_df['date'].astype(str)
-        sva_data[timeframe] = interest_over_time_df.rename(columns={product_name: 'score'})[['date', 'score']].to_dict(orient='records')
+        for timeframe in valid_timeframes:
+            # Global Interest Over Time
+            pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo=geo_global)
+            interest_over_time_df = pytrends.interest_over_time().reset_index()
+            interest_over_time_df['date'] = interest_over_time_df['date'].astype(str)
+            sva_data[timeframe] = interest_over_time_df.rename(columns={product_name: 'score'})[['date', 'score']].to_dict(orient='records')
 
-    result = {'sva': sva_data}
+            # Regional Interest
+            pytrends.build_payload(kw_list, cat=0, timeframe=timeframe, geo=geo_global)
+            regional_interest_df = pytrends.interest_by_region(resolution='CITY', inc_low_vol=True)
+            regional_data[timeframe] = regional_interest_df.to_dict()
 
-    return jsonify(result), 200
+        result = {'sva': sva_data, 'regional': regional_data, 'product_name': global_title}
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
