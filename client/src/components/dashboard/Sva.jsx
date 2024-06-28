@@ -21,6 +21,7 @@ const SeasonalVariationChart = () => {
     const fetchData = async () => {
       try {
         const result = await axios.get("http://127.0.0.1:5000/sva");
+        console.log("sva " + data);
         setData(result.data);
         setTitle(result.data["product_name"]);
       } catch (error) {

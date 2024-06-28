@@ -9,6 +9,9 @@ from transformers import AutoModelForSequenceClassification
 from langchain_community.llms import HuggingFaceHub
 from scipy.special import softmax
 from flask import jsonify
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+import joblib
 from rake_nltk import Rake
 from pytrends.request import TrendReq
 from sklearn.decomposition import NMF
@@ -29,14 +32,14 @@ import datetime
 import torch
 from dotenv import load_dotenv, get_key
 load_dotenv()
-# import nltk
+import nltk
 
 # # import statsmodels.api as sm
 
 # # ---------------------------------------
-# # nltk.download('punkt')
-# # nltk.download('wordnet')
-# # nltk.download('stopwords')
+# nltk.download('punkt')
+# nltk.download('wordnet')
+# nltk.download('stopwords')
 # # ---------------------------------------
 app = Flask(__name__)
 CORS(app)
@@ -71,10 +74,6 @@ def createProduct(url):
   date = datetime.datetime.now()
   avgRating = soup.find('span', {'data-hook': 'rating-out-of-text'}).text.strip()
   strDate = date.strftime("%Y-%m-%d %H:%M:%S")
-  print(price)
-  print(desc)
-  print(img)
-  print(date)
   product_details = {
       'name': title.strip(),
       'url': url,
@@ -84,27 +83,22 @@ def createProduct(url):
       'date': strDate,
        'avgRating': float(avgRating.split()[0]),
       }
+#   print(f"product details : {product_details}")
   filter_query = { "email": "sonarsiddhesh105@gmail.com" }
   # print(db)
   client = pymongo.MongoClient("mongodb+srv://sonarsiddhesh105:K5NuO27RwuV2R986@cluster0.0aedb3y.mongodb.net/?retryWrites=true&w=majority")
   db = client['test']
   collect = db['cres_users']
   update_result = collect.update_one(filter_query, { "$push": { "products": product_details } })
-  print("Documents matched:", update_result.matched_count)
-  print("Documents modified:", update_result.modified_count)
+#   print("Documents :", update_result)
   return url
 
 def extractReviews(rurl, uurl):
-  # print(rurl)
-  # print("pg no - ", pg)
   page = requests.get(rurl, headers=headers)
-  # print(page)
   soup = BeautifulSoup(page.content, "html.parser")
   reviews = soup.findAll('div', {'data-hook': 'review' })
-  print(len(reviews))
-  # print(reviews[0])
+#   print(f"reviews : {reviews}")
   for item in reviews:
-    # print(item)
     ratingText = item.find('i', {'data-hook': 'review-star-rating' }).text.strip()
     fullDate = item.find('span', {'data-hook': 'review-date' }).text.strip()
     date_obj = fullDate.split('on')[1].strip()
@@ -128,12 +122,7 @@ def extractReviews(rurl, uurl):
   db = client['test']
   collect = db['cres_users']
   update_result = collect.update_one(filter_query, update_query, array_filters=array_filters)
-
-  print("Documents matched:", update_result.matched_count)
-  print("Documents modified:", update_result.modified_count)
   return reviewList
-
-
 
 valid_timeframes = [
     "now 7-d",
@@ -178,6 +167,7 @@ def index():
 def absa():
     review = revString[0]
     # review = request.form['text']
+    # print(f"review : {review}")
     try:
         aspects = request.form['aspects']
         aspects = aspects.split(',')
@@ -205,7 +195,6 @@ def absa():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-
 @app.route('/kextract', methods=['GET'])
 def kextract():
     text = revString[0]
@@ -213,7 +202,7 @@ def kextract():
     try:
         lemmatized_text = lemmatize_text(text)
         email = session.get('email')
-        print(email, session.get('url'),revString[0])
+        # print(email, session.get('url'),revString[0])
         r.extract_keywords_from_text(lemmatized_text)
         keywords_with_scores = r.get_ranked_phrases_with_scores()
         keywords_list = [{"word": keyword, "score": score} for score, keyword in keywords_with_scores]
@@ -254,38 +243,14 @@ def polarity_scores_roberta(example):
 @app.route("/sentiment", methods=["GET"])
 def analyze_sentiment():
     try:
-        # data = request.form.to_dict()
-        # data = reviewList
-        # print('r list - ', data)
-        # text = []
-        # for d in data:
-        #     text.append(d['body'])
-        # # text = data.get("body")
-        # print('text - ', text)
-        # email = session.get('email')
         text = revString[0]
 
         scores = polarity_scores_roberta(text)
-
-        # Connect to MongoDB
-        # client = pymongo.MongoClient("mongodb+srv://sonarsiddhesh105:K5NuO27RwuV2R986@cluster0.0aedb3y.mongodb.net/?retryWrites=true&w=majority")
-        # db = client['test']
-        # collect = db['cres_users']
-
-        # filter_query = {"email": email}
-        # update_query = {"$set": {"products.$[product].sentiment": scores}}
-        # array_filters = [{"product.url": url}]
-
-        # update_result = collect.update_one(filter_query, update_query, array_filters=array_filters)
-        # print("Documents matched:", update_result.matched_count)
-        # print("Documents modified:", update_result.modified_count)
-
-        # Directly return the sentiment scores as JSON
+        
         return jsonify(scores)
 
     except Exception as e:
         return jsonify({"error": str(e)})
-
 
 @app.route('/start',methods=["POST"])
 def start():
@@ -296,16 +261,14 @@ def start():
         uniqueUrl = createProduct(url)
         nurl = url.split('?')
         url = nurl[0]
-        reviewUrl = url.replace("dp", "product-reviews") + "?pageNumber=" + str(1)
-        # print(reviewUrl)
+        reviewUrl = url.replace("dp", "product-reviews") + "?pageNumber=1"
         x = extractReviews(reviewUrl, uniqueUrl)
-        # print(x)
         client = pymongo.MongoClient("mongodb+srv://sonarsiddhesh105:K5NuO27RwuV2R986@cluster0.0aedb3y.mongodb.net/?retryWrites=true&w=majority")
         db = client['test']
         collect = db['cres_users']
-        print(revString)
-        user = collect.find_one({'email': session.get('email')})
-
+        # print(f"revString : {revString}")
+        user = collect.find_one({'email': session['email']})
+        print(f"userrrr : {user['products']}")
         if user:
             # Retrieve product using URL
             for product in user['products']:
@@ -318,9 +281,7 @@ def start():
         print(e)
         return jsonify({"error": str(e)})
 
-
-
-
+# seasonal variation analysis
 @app.route('/sva', methods=["GET"])
 def interest_over_time():
     try:
@@ -350,14 +311,14 @@ def interest_over_time():
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)})
-    
-
 
 # ---------------------------------lda------------------------------------
 
 def analyze_reviews(reviewList):
     lemmatizer = WordNetLemmatizer()
     stop_words = set(stopwords.words('english'))
+    print(reviewList)
+
     if len(reviewList)==0:
         return "List is Empty"
     # Combine review bodies into one string
@@ -452,7 +413,6 @@ def chat():
         return jsonify(res)
     except Exception as e:
         return jsonify({"error": str(e)})
-
 
 if __name__ == '__main__':
     

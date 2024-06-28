@@ -18,8 +18,11 @@ const ChartComponent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.get("http://127.0.0.1:5000/related_sentences");
+      const response = await axios.get(
+        "http://127.0.0.1:5000/related_sentences"
+      );
       const data = await response.data;
+      console.log("lda " + data);
       setData(data);
       setLoading(false);
     };

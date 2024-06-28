@@ -19,7 +19,7 @@ const Aspect = ({ data }) => {
     const fetchData = async () => {
       try {
         const res = await axios.get("http://127.0.0.1:5000/absa");
-        console.log(res.data);
+        console.log("absa " + res.data);
         setAspects(res.data);
         setLoading(false);
       } catch (err) {

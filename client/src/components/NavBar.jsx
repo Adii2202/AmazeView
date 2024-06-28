@@ -1,25 +1,25 @@
-import { Fragment, useEffect } from 'react'
-import { useState } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import logo from '../assets/logo-hck.svg'
+import { Fragment, useEffect } from "react";
+import { useState } from "react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import logo from "../assets/logo-hck.svg";
 
 const navigation = [
-    { name: 'Home', href: '/home', current: false },
-    { name: 'Dashboard', href: '/dashboard', current: false },
-    // { name: 'ChatBot', href: '/chatbot', current: false },
-]
+  { name: "Home", href: "/home", current: false },
+  { name: "Dashboard", href: "/dashboard", current: false },
+  { name: "Analysis", href: "/analysis", current: false },
+];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
 function NavBar() {
-    const [path, setPath] = useState(window.location.pathname)
+  const [path, setPath] = useState(window.location.pathname);
 
-    useEffect(() => {
-        setPath(window.location.pathname)
-    }, [window.location.pathname])
+  useEffect(() => {
+    setPath(window.location.pathname);
+  }, [window.location.pathname]);
 
   return (
     <Disclosure as="nav" className="bg-[#33006F] sticky top-0 z-[999] ">
@@ -164,4 +164,4 @@ function NavBar() {
   );
 }
 
-export default NavBar
+export default NavBar;

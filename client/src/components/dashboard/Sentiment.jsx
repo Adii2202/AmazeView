@@ -43,22 +43,22 @@ const Sentiment = ({ data }) => {
       await axios
         .get("http://127.0.0.1:5000/sentiment")
         .then((res) => {
-          console.log(res.data);
-            const sentimentData = [
-              {
-                name: "Negative",
-                value: parseFloat(res.data.negative.toFixed(4)),
-              },
-              {
-                name: "Neutral",
-                value: parseFloat(res.data.neutral.toFixed(4)),
-              },
-              {
-                name: "Positive",
-                value: parseFloat(res.data.positive.toFixed(4)),
-              },
-            ];
-            setSentimentData(sentimentData);
+          console.log("sentiment " + res.data);
+          const sentimentData = [
+            {
+              name: "Negative",
+              value: parseFloat(res.data.negative.toFixed(4)),
+            },
+            {
+              name: "Neutral",
+              value: parseFloat(res.data.neutral.toFixed(4)),
+            },
+            {
+              name: "Positive",
+              value: parseFloat(res.data.positive.toFixed(4)),
+            },
+          ];
+          setSentimentData(sentimentData);
           setLoading(false);
         })
         .catch((err) => {
